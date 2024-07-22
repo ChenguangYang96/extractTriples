@@ -56,13 +56,20 @@ def write_list_into_file(work_path, list):
     day = local_time.tm_mday
     hour = local_time.tm_hour
     minute = local_time.tm_min
+    exclude_preds = ['in', 'for', 'by', 'as', 'is of']
 
     file_name = "triples_" + str(year) + "_" + str(month) + "_" + str(day) + "_" + str(hour) + "_" + str(minute) + ".csv"
     if os.path.exists(work_path + file_name):
         raise ValueError("old extract triples already exist, please make sure you want to overwrite it!")
     with open(file_name, "w+", encoding='utf-8') as file:
         for triple in list:
-            file.write(str(triple) + "\n")
+            exclude_flag = False
+            for exclude_pred in exclude_preds:
+                if str(triple).find(str(exclude_pred)) != -1:
+                    exclude_flag = True
+            if exclude_flag == False:
+                file.write(str(triple) + "\n")
+
 
 def filter_key_words_from_triples(work_path, list, filters):
     local_time  = time.localtime()
@@ -73,17 +80,22 @@ def filter_key_words_from_triples(work_path, list, filters):
     minute = local_time.tm_min
 
     filter_triples = []
+    exclude_preds = ['in', 'for', 'by', 'as', 'is of']
 
     file_name = "fileter_triples_" + str(year) + "_" + str(month) + "_" + str(day) + "_" + str(hour) + "_" + str(minute) + ".csv"
     if os.path.exists(work_path + file_name):
         raise ValueError("old extract triples already exist, please make sure you want to overwrite it!")
     with open(file_name, "w+", encoding='utf-8') as file:
         for triple in list:
-            for filter in filters:
-                if str(triple).find(str(filter)) is not -1:
-                    filter_triples.append(triple)
-                    file.write(str(triple) + "\n")
-                    break
-        
+            exclude_flag = False
+            for exclude_pred in exclude_preds:
+                if str(triple).find(str(exclude_pred)) != -1:
+                    exclude_flag = True
+            if exclude_flag == False:
+                for filter in filters:
+                    if str(triple).find(str(filter)) != -1:
+                        filter_triples.append(triple)
+                        file.write(str(triple) + "\n")
+                        break
         return filter_triples
                     

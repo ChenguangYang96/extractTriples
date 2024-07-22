@@ -554,5 +554,3 @@ def start_extract_triples():
     rank_by_degree(filter_triples)
     print('<<<<<<<<<<<<<<<<<<<<<<<< finished extract triples <<<<<<<<<<<<<<<<<<<<<<<<')
     
-# TODO visulization 
-# TODO TRIPLES 

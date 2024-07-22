@@ -74,7 +74,7 @@ def adjust(inpath, outpath, file_type):
                     pass
                 else:
                     string += line
-                if 'I.' in line:
+                if 'I.' in line or 'I .' in line or '1. Introduction' in line:
                     break
         write_file(outpath, string, 'w')
         f.close()
@@ -96,7 +96,7 @@ def adjust(inpath, outpath, file_type):
                     pass
                 else:
                     string += line
-                if 'I.' in line or 'I .' in line:
+                if 'I.' in line or 'I .' in line or '1. Introduction' in line:
                     break
         write_file(outpath, string, 'w')
         f.close()
