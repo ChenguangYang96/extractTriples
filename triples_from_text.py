@@ -2,6 +2,7 @@
 """
 external import
 """
+import time 
 import os
 import sys
 import pandas as pd
@@ -14,6 +15,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 #nltk.download('stopwords')
 from nltk.corpus import stopwords
+from py2neo import Graph, Node, Relationship, NodeMatcher
 
 """
 internal import
@@ -464,6 +466,48 @@ def rank_by_degree(mytriples): #, limit):
         ranked_triples.append([u, d['p'], v])
     return ranked_triples
 
+def draw_graph_by_neo4j(mytriples):
+    graph = Graph(
+        "bolt://localhost:7687", 
+        auth=("neo4j", "123456789")
+    )
+    # graph = Graph(
+    #     "http://localhost:7474", 
+    #     auth=("neo4j", "neo4j")
+    # )
+    graph.delete_all()
+    print('triples size: {0}'.format(len(mytriples)))
+    for s,p,o in mytriples:
+        matcher = NodeMatcher(graph)
+        subject_list = list(matcher.match('node', name=s))
+        object_list = list(matcher.match('node', name=o))
+        if len(subject_list) > 0:
+            # subject node has already exist
+            if len(object_list) > 0:
+                # subject & object both exist
+                relation = Relationship(subject_list[0], p, object_list[0])
+                graph.create(relation)
+            else:
+                # only subject exist, object does not exist
+                object_node = Node('node', name=o)
+                relation = Relationship(subject_list[0], p, object_node)
+                graph.create(relation)
+        else:
+            # subject does not exist
+            if len(object_list) > 0:
+                # only object exist, subject does not exist
+                subject_node = Node('node', name=s)
+                relation = Relationship(subject_node, p, object_list[0])
+                graph.create(relation)
+            else:
+                # subject & object both do not exist
+                subject_node = Node('node', name=s)
+                object_node = Node('node', name=o)
+                relation = Relationship(subject_node, p, object_node)
+                graph.create(relation)
+
+    print("finish draw graph by neo4j")
+
 # Draw triples
 def extract_triples(text):
     df_tagged, corefs = tagger(text) # The pipeline processes the text and returns the characteristics of each token, as well as the result of the co-referential digestion
@@ -551,6 +595,7 @@ def start_extract_triples():
     # stroe filter triples in file
     filter_list = ['DT', 'digital twins', 'digital twin', 'Digital twin', 'Digital Twin', 'Digital Twins']
     filter_triples = utils.filter_key_words_from_triples(work_path, all_triples, filter_list)
-    rank_by_degree(filter_triples)
+    draw_graph_by_neo4j(filter_triples)
+    # rank_by_degree(filter_triples)
     print('<<<<<<<<<<<<<<<<<<<<<<<< finished extract triples <<<<<<<<<<<<<<<<<<<<<<<<')
     

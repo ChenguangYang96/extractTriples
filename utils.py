@@ -95,7 +95,29 @@ def filter_key_words_from_triples(work_path, list, filters):
                 for filter in filters:
                     if str(triple).find(str(filter)) != -1:
                         filter_triples.append(triple)
-                        file.write(str(triple) + "\n")
+                        file.write(str(triple).strip('[]').replace("'", "") + "\n")
                         break
         return filter_triples
-                    
+
+
+def create_node_relation_by_neo4j(mytriples):
+    Node_file_name = "Node.csv"
+    Relation_file_name = "Relation.csv"
+
+    with open(Node_file_name, "w+", encoding='utf-8') as file:
+        file.write("id, node" + "\n")
+        current_id = 1
+        for s,p,o in mytriples:
+            file.write(str(current_id) + ", " + s + "\n")
+            current_id += 1
+            file.write(str(current_id) + ", " + o + "\n")
+            current_id += 1
+    file.close()
+
+    with open(Relation_file_name, "w+", encoding='utf-8') as file:
+        file.write("from_id, relation, to_id" + "\n")
+        current_id = 1
+        for s,p,o in mytriples:
+            file.write(str(current_id) + ", " + p + ", "  + str(current_id + 1) + "\n")
+            current_id += 2
+    file.close()
